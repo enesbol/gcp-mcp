@@ -1,3 +1,7 @@
+# This is not a Ready MCP Server
+
+
+
 # GCP MCP Server
 
 A comprehensive Model Context Protocol (MCP) server implementation for Google Cloud Platform (GCP) services, enabling AI assistants to interact with and manage GCP resources through a standardized interface.
@@ -31,7 +35,7 @@ The project is structured as follows:
 
 ```
 gcp-mcp-server/
-├── core/            # Core MCP server functionality
+├── core/            # Core MCP server functionality auth context logging_handler security 
 ├── prompts/         # AI assistant prompts for GCP operations
 ├── services/        # GCP service implementations
 │   ├── README.md    # Service implementation details
@@ -182,8 +186,61 @@ Or install it in Claude Desktop:
 mcp install gcp_cloudrun_server.py --name "GCP Cloud Run Manager"
 ```
 
-The server supports customization through environment variables:
-- `GCP_CREDENTIALS_PATH`: Path to service account key file
-- `GCP_REGION`: GCP region for Cloud Run services
 
-Want to expand this to other GCP services like Cloud Storage, BigQuery, or Compute Engine? The same pattern can be extended by adding more clients and resource/tool handlers.
+## MCP Server Configuration
+
+The following configuration can be added to your configuration file for GCP Cloud Tools:
+
+```json
+"mcpServers": {
+  "GCP Cloud Tools": {
+    "command": "uv",
+    "args": [
+      "run",
+      "--with",
+      "google-cloud-artifact-registry>=1.10.0",
+      "--with",
+      "google-cloud-bigquery>=3.27.0",
+      "--with",
+      "google-cloud-build>=3.0.0",
+      "--with",
+      "google-cloud-compute>=1.0.0",
+      "--with",
+      "google-cloud-logging>=3.5.0",
+      "--with",
+      "google-cloud-monitoring>=2.0.0",
+      "--with",
+      "google-cloud-run>=0.9.0",
+      "--with",
+      "google-cloud-storage>=2.10.0",
+      "--with",
+      "mcp[cli]",
+      "--with",
+      "python-dotenv>=1.0.0",
+      "mcp",
+      "run",
+      "C:\\Users\\enes_\\Desktop\\mcp-repo-final\\gcp-mcp\\src\\gcp-mcp-server\\main.py"
+    ],
+    "env": {
+      "GOOGLE_APPLICATION_CREDENTIALS": "C:/Users/enes_/Desktop/mcp-repo-final/gcp-mcp/service-account.json",
+      "GCP_PROJECT_ID": "gcp-mcp-cloud-project",
+      "GCP_LOCATION": "us-east1"
+    }
+  }
+}
+```
+
+### Configuration Details
+
+This configuration sets up an MCP server for Google Cloud Platform tools with the following:
+
+- **Command**: Uses `uv` package manager to run the server
+- **Dependencies**: Includes various Google Cloud libraries (Artifact Registry, BigQuery, Cloud Build, etc.)
+- **Environment Variables**:
+  - `GOOGLE_APPLICATION_CREDENTIALS`: Path to your GCP service account credentials
+  - `GCP_PROJECT_ID`: Your Google Cloud project ID
+  - `GCP_LOCATION`: GCP region (us-east1)
+
+### Usage
+
+Add this configuration to your MCP configuration file to enable GCP Cloud Tools functionality.

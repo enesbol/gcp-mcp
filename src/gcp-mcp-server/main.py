@@ -1,6 +1,19 @@
-import importlib.util
-import logging
 import os
+
+# At the top of main.py, add these imports and logging statements
+import sys
+
+# Get the directory containing main.py
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Add it to Python's module search path
+sys.path.append(current_dir)
+# Also add the parent directory if needed
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
+
+
+import inspect
+import logging
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Dict
 
@@ -11,6 +24,10 @@ from services import client_instances
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# After adding paths, print them to see what's happening
+print(f"Current working directory: {os.getcwd()}")
+print(f"Updated Python path: {sys.path}")
 
 
 @asynccontextmanager
@@ -52,15 +69,16 @@ mcp = FastMCP(
     description="Manage Google Cloud Platform Resources",
     lifespan=gcp_lifespan,
     dependencies=[
-        "google-cloud-bigquery>=3.27.0",
-        "google-cloud-storage>=2.10.0",
-        "google-cloud-run>=0.9.0",
-        "google-cloud-artifact-registry>=1.10.0",
-        "google-cloud-logging>=3.5.0",
-        "python-dotenv>=1.0.0",
-        "google-cloud-monitoring>=2.0.0",
-        "google-cloud-compute>=1.0.0",
-        "google-cloud-build>=3.0.0",
+        "mcp>=1.0.0",
+        "google-cloud-bigquery",
+        "google-cloud-storage",
+        "google-cloud-run",
+        "google-cloud-artifact-registry",
+        "google-cloud-logging",
+        "python-dotenv",
+        "google-cloud-monitoring",
+        "google-cloud-compute",
+        "google-cloud-build",
     ],
 )
 
@@ -90,41 +108,87 @@ def test_gcp_auth() -> str:
         return f"Authentication failed: {str(e)}"
 
 
-# Function to register services
+# # Function to register services
+# def register_services():
+#     """Register all service modules with the MCP instance."""
+#     services_dir = os.path.join(os.path.dirname(__file__), "services")
+#     logger.info(f"Loading services from {services_dir}")
+#     if not os.path.exists(services_dir):
+#         logger.warning(f"Services directory not found: {services_dir}")
+#         return
+#     # Get all Python files in the services directory
+#     for filename in os.listdir(services_dir):
+#         if (
+#             filename.endswith(".py")
+#             and filename != "__init__.py"
+#             and filename != "client_instances.py"
+#         ):
+#             module_name = filename[:-3]  # Remove .py extension
+#             try:
+#                 # Load the module using importlib
+#                 module_path = os.path.join(services_dir, filename)
+#                 spec = importlib.util.spec_from_file_location(
+#                     f"services.{module_name}", module_path
+#                 )
+#                 module = importlib.util.module_from_spec(spec)
+#                 # Inject mcp instance into the module
+#                 module.mcp = mcp
+#                 # Execute the module
+#                 spec.loader.exec_module(module)
+#                 logger.info(f"Loaded service module: {module_name}")
+#                 # If the module has a register function, call it
+#                 if hasattr(module, "register"):
+#                     # Pass the mcp instance and the server's request_context to register
+#                     module.register(mcp)
+#                     logger.info(f"Registered service: {module_name}")
+#             except Exception as e:
+#                 logger.error(f"Error loading service {module_name}: {e}")
+
+
 def register_services():
     """Register all service modules with the MCP instance."""
-    services_dir = os.path.join(os.path.dirname(__file__), "services")
-    logger.info(f"Loading services from {services_dir}")
-    if not os.path.exists(services_dir):
-        logger.warning(f"Services directory not found: {services_dir}")
-        return
-    # Get all Python files in the services directory
-    for filename in os.listdir(services_dir):
-        if (
-            filename.endswith(".py")
-            and filename != "__init__.py"
-            and filename != "client_instances.py"
-        ):
-            module_name = filename[:-3]  # Remove .py extension
-            try:
-                # Load the module using importlib
-                module_path = os.path.join(services_dir, filename)
-                spec = importlib.util.spec_from_file_location(
-                    f"services.{module_name}", module_path
-                )
-                module = importlib.util.module_from_spec(spec)
-                # Inject mcp instance into the module
-                module.mcp = mcp
-                # Execute the module
-                spec.loader.exec_module(module)
-                logger.info(f"Loaded service module: {module_name}")
-                # If the module has a register function, call it
-                if hasattr(module, "register"):
-                    # Pass the mcp instance and the server's request_context to register
-                    module.register(mcp)
-                    logger.info(f"Registered service: {module_name}")
-            except Exception as e:
-                logger.error(f"Error loading service {module_name}: {e}")
+    logger.info("Explicitly registering service modules")
+
+    # Print diagnostic information
+    logger.info(f"Python sys.path: {sys.path}")
+    logger.info(f"Current working directory: {os.getcwd()}")
+    logger.info(f"Script location: {os.path.abspath(__file__)}")
+    logger.info(f"Parent directory: {os.path.dirname(os.path.abspath(__file__))}")
+
+    try:
+        # Try importing a service module to check if imports work
+        logger.info("Attempting to import artifact_registry")
+        import services.artifact_registry as artifact_registry
+
+        logger.info(f"Module location: {inspect.getfile(artifact_registry)}")
+        from services import (
+            artifact_registry,
+            cloud_audit_logs,
+            cloud_bigquery,
+            cloud_build,
+            cloud_compute_engine,
+            cloud_monitoring,
+            cloud_run,
+            cloud_storage,
+        )
+
+        # Register each service module
+        artifact_registry.register(mcp)
+        cloud_audit_logs.register(mcp)
+        cloud_bigquery.register(mcp)
+        cloud_build.register(mcp)
+        cloud_compute_engine.register(mcp)
+        cloud_monitoring.register(mcp)
+        cloud_run.register(mcp)
+        cloud_storage.register(mcp)
+
+        logger.info("All service modules registered successfully")
+    except Exception as e:
+        logger.error(f"Error registering service modules: {e}")
+        # Add detailed error logging
+        import traceback
+
+        logger.error(traceback.format_exc())
 
 
 if __name__ == "__main__":
