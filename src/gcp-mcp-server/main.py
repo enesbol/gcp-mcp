@@ -51,6 +51,17 @@ mcp = FastMCP(
     "GCP Manager",
     description="Manage Google Cloud Platform Resources",
     lifespan=gcp_lifespan,
+    dependencies=[
+        "google-cloud-bigquery>=3.27.0",
+        "google-cloud-storage>=2.10.0",
+        "google-cloud-run>=0.9.0",
+        "google-cloud-artifact-registry>=1.10.0",
+        "google-cloud-logging>=3.5.0",
+        "python-dotenv>=1.0.0",
+        "google-cloud-monitoring>=2.0.0",
+        "google-cloud-compute>=1.0.0",
+        "google-cloud-build>=3.0.0",
+    ],
 )
 
 

@@ -4,10 +4,15 @@ import os
 from typing import Any, Optional, Type
 
 import google.auth
-from google.cloud import artifactregistry_v1, storage
 
 # Import other services as needed
-# from google.cloud import bigquery, compute_v1, logging_v2, monitoring_v3, run_v2, storage
+from google.cloud import (
+    artifactregistry_v1,
+    bigquery,
+    compute_v1,
+    monitoring_v3,
+    storage,
+)
 from google.oauth2 import service_account
 
 
@@ -123,6 +128,13 @@ class GCPClients:
         return self._storage_client
 
     @property
+    def bigquery(self) -> bigquery.Client:
+        self._bigquery_client = self._init_client(
+            bigquery.Client, self._bigquery_client
+        )
+        return self._bigquery_client
+
+    @property
     def artifactregistry(self) -> artifactregistry_v1.ArtifactRegistryClient:
         """Get the Artifact Registry client."""
         if not self._artifactregistry_client:
@@ -169,18 +181,6 @@ class Context:
         if hasattr(self, "clients"):
             self.clients.close_all()
 
-    @property
-    def storage(self) -> storage.Client:
-        self._storage_client = self._init_client(storage.Client, self._storage_client)
-        return self._storage_client
-
-    # @property
-    # def bigquery(self) -> bigquery.Client:
-    #     self._bigquery_client = self._init_client(
-    #         bigquery.Client, self._bigquery_client
-    #     )
-    #     return self._bigquery_client
-
     # @property
     # def run(self) -> run_v2.CloudRunClient:
     #     self._run_client = self._init_client(run_v2.CloudRunClient, self._run_client)
@@ -193,19 +193,19 @@ class Context:
     #     )
     #     return self._logging_client
 
-    # @property
-    # def monitoring(self) -> monitoring_v3.MetricServiceClient:
-    #     self._monitoring_client = self._init_client(
-    #         monitoring_v3.MetricServiceClient, self._monitoring_client
-    #     )
-    #     return self._monitoring_client
+    @property
+    def monitoring(self) -> monitoring_v3.MetricServiceClient:
+        self._monitoring_client = self._init_client(
+            monitoring_v3.MetricServiceClient, self._monitoring_client
+        )
+        return self._monitoring_client
 
-    # @property
-    # def compute(self) -> compute_v1.InstancesClient:
-    #     self._compute_client = self._init_client(
-    #         compute_v1.InstancesClient, self._compute_client
-    #     )
-    #     return self._compute_client
+    @property
+    def compute(self) -> compute_v1.InstancesClient:
+        self._compute_client = self._init_client(
+            compute_v1.InstancesClient, self._compute_client
+        )
+        return self._compute_client
 
     # @property
     # def sql(self) -> sql_v1.InstancesClient:

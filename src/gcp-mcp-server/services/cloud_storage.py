@@ -65,10 +65,9 @@ def register(mcp_instance):
             return json.dumps({"error": str(e)}, indent=2)
 
     @mcp_instance.resource("gcp://storage/{project_id}/bucket/{bucket_name}/objects")
-    def list_objects_resource(
-        project_id: str = None, bucket_name: str = None, prefix: str = ""
-    ) -> str:
+    def list_objects_resource(project_id: str = None, bucket_name: str = None) -> str:
         """List objects in a specific Cloud Storage bucket"""
+        prefix = ""  # Move it inside the function with a default value
         try:
             # Get client from client_instances
             client = client_instances.get_clients().storage
