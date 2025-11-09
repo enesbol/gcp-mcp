@@ -9,8 +9,11 @@ import google.auth
 from google.cloud import (
     artifactregistry_v1,
     bigquery,
+    cloudbuild_v1,
     compute_v1,
+    logging_v2,
     monitoring_v3,
+    run_v2,
     storage,
 )
 from google.oauth2 import service_account
@@ -151,11 +154,75 @@ class GCPClients:
                 )
         return self._artifactregistry_client
 
-    # Uncomment and implement other client properties as needed
-    # @property
-    # def storage(self) -> storage.Client:
-    #     self._storage_client = self._init_client(storage.Client, self._storage_client)
-    #     return self._storage_client
+    @property
+    def logging(self) -> logging_v2.LoggingServiceV2Client:
+        """Get the Cloud Logging client."""
+        if not self._logging_client:
+            try:
+                self._logging_client = logging_v2.LoggingServiceV2Client(
+                    credentials=self.credentials
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to initialize LoggingServiceV2Client: {str(e)}"
+                )
+        return self._logging_client
+
+    @property
+    def cloudbuild(self) -> cloudbuild_v1.CloudBuildClient:
+        """Get the Cloud Build client."""
+        if not self._cloudbuild_client:
+            try:
+                self._cloudbuild_client = cloudbuild_v1.CloudBuildClient(
+                    credentials=self.credentials
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to initialize CloudBuildClient: {str(e)}"
+                )
+        return self._cloudbuild_client
+
+    @property
+    def compute(self) -> compute_v1.InstancesClient:
+        """Get the Compute Engine client."""
+        if not self._compute_client:
+            try:
+                self._compute_client = compute_v1.InstancesClient(
+                    credentials=self.credentials
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to initialize InstancesClient: {str(e)}"
+                )
+        return self._compute_client
+
+    @property
+    def monitoring(self) -> monitoring_v3.MetricServiceClient:
+        """Get the Cloud Monitoring client."""
+        if not self._monitoring_client:
+            try:
+                self._monitoring_client = monitoring_v3.MetricServiceClient(
+                    credentials=self.credentials
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to initialize MetricServiceClient: {str(e)}"
+                )
+        return self._monitoring_client
+
+    @property
+    def run(self) -> run_v2.ServicesClient:
+        """Get the Cloud Run client."""
+        if not self._run_client:
+            try:
+                self._run_client = run_v2.ServicesClient(
+                    credentials=self.credentials
+                )
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to initialize ServicesClient: {str(e)}"
+                )
+        return self._run_client
 
     def close_all(self):
         """Close all open clients"""
@@ -180,41 +247,3 @@ class Context:
         """Clean up when request ends"""
         if hasattr(self, "clients"):
             self.clients.close_all()
-
-    # @property
-    # def run(self) -> run_v2.CloudRunClient:
-    #     self._run_client = self._init_client(run_v2.CloudRunClient, self._run_client)
-    #     return self._run_client
-
-    # @property
-    # def logging(self) -> logging_v2.LoggingServiceV2Client:
-    #     self._logging_client = self._init_client(
-    #         logging_v2.LoggingServiceV2Client, self._logging_client
-    #     )
-    #     return self._logging_client
-
-    @property
-    def monitoring(self) -> monitoring_v3.MetricServiceClient:
-        self._monitoring_client = self._init_client(
-            monitoring_v3.MetricServiceClient, self._monitoring_client
-        )
-        return self._monitoring_client
-
-    @property
-    def compute(self) -> compute_v1.InstancesClient:
-        self._compute_client = self._init_client(
-            compute_v1.InstancesClient, self._compute_client
-        )
-        return self._compute_client
-
-    # @property
-    # def sql(self) -> sql_v1.InstancesClient:
-    #     self._sql_client = self._init_client(sql_v1.InstancesClient, self._sql_client)
-    #     return self._sql_client
-
-    # @property
-    # def cloudbuild(self) -> cloudbuild_v1.CloudBuildClient:
-    #     self._cloudbuild_client = self._init_client(
-    #         cloudbuild_v1.CloudBuildClient, self._cloudbuild_client
-    #     )
-    #     return self._cloudbuild_client
