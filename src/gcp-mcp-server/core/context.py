@@ -9,13 +9,13 @@ import google.auth
 from google.cloud import (
     artifactregistry_v1,
     bigquery,
-    cloudbuild_v1,
     compute_v1,
     logging_v2,
     monitoring_v3,
     run_v2,
     storage,
 )
+from google.cloud.devtools import cloudbuild_v1
 from google.oauth2 import service_account
 
 
